@@ -9,11 +9,11 @@ WordTrie::Node* WordTrie::_search(const std::string& val) const {
         }
         ptr = ptr->children[i].get();
     }
-    return ptr->word ? ptr : nullptr;
+	return ptr;
 }
 
 void WordTrie::_build_words(std::set<std::string>& results, std::string letters, std::string prefix, Node *ptr) const {
-    if (_search(prefix) != nullptr) {
+    if (search(prefix)) {
         results.insert(prefix);
     }
 
@@ -22,14 +22,15 @@ void WordTrie::_build_words(std::set<std::string>& results, std::string letters,
         if (ch == '_') {
             for (char c = 'a'; c <= 'z'; ++c) {
                 int idx = index(c);
-                if (ptr->children[idx] == nullptr) continue;
-                letters.erase(i, 1);
-                ptr = ptr->children[idx].get();
-                prefix += c;
-                _build_words(results, letters, prefix, ptr);
-                prefix.pop_back();
-                ptr = ptr->parent;
-                letters.insert(i, 1, '_');
+				if (ptr->children[idx] != nullptr) {
+					letters.erase(i, 1);
+					ptr = ptr->children[idx].get();
+					prefix += c;
+					_build_words(results, letters, prefix, ptr);
+					prefix.pop_back();
+					ptr = ptr->parent;
+					letters.insert(i, 1, '_');
+				}
             }
         } else {
             int idx = index(ch);
@@ -61,6 +62,11 @@ void WordTrie::insert(const std::string& word) {
     ptr->word = true;
 }
 
+bool WordTrie::search(const std::string& val) const {
+	Node* res = _search(val);
+	return res != nullptr && res->word;
+}
+
 void WordTrie::remove(const std::string& val) {
     Node* ptr = _search(val);
     if (ptr == nullptr) {
@@ -77,12 +83,9 @@ void WordTrie::remove(const std::string& val) {
 
 std::vector<std::string> WordTrie::build_words(const std::string& letters, const std::string& prefix) const {
     std::set<std::string> words;
-    if (prefix != "") {
-        auto loc = _search(prefix);
-        if (loc != nullptr) {
-            _build_words(words, letters, prefix, loc);
-        }
-    }
+	Node* start = prefix == "" ? root.get() : _search(prefix);
+	if (start != nullptr)
+		_build_words(words, letters, prefix, start);
     return std::vector<std::string>(words.begin(), words.end());
 }
 

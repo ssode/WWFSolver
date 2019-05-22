@@ -22,19 +22,26 @@ int main(int argc, char** argv) {
 		std::cout << "Usage: wwfsolver [options] [letters]\n";
 		return 1;
 	} else if (args.has_option("-?") || args.has_option("--help")) {
-		std::cout << "Usage: wwfsolver [options] [letters]\nOptions:\n\t-p [prefix] : sets the prefix of the search string\n\t-l [limit] : sets a limit on the number of results returned\n";
+		std::cout 
+			<< "Usage: wwfsolver [options] [letters]\n"
+			<< "Options:\n" 
+			<< "\t-p [prefix] : sets the prefix of the search string\n"
+			<< "\t-l [limit] : sets a limit on the number of results returned\n"
+			<< "\t-lc [num_letters] : specifies the number of letters in the words to be returned\n"
+			<< "\t-f [filename] : specifies a file to use as input (1 word per line)\n";
 		return 0;
 	}
 	int count;
-	std::string filename, prefix, letters;
-	filename = args.get_option_or<std::string>("-f", "wordlist.txt");
-	prefix = args.get_option_or<std::string>("-p", "");
-	letters = argv[argc-1];
+	std::string filename = args.get_option_or<std::string>("-f", "wordlist.txt");
+	std::string prefix = args.get_option_or<std::string>("-p", "");
+	std::string letters = argv[argc - 1];
+	int letter_count = args.get_option_or<int>("-lc", 0);
 	std::transform(prefix.begin(), prefix.end(), prefix.begin(), ::tolower);
 	std::transform(letters.begin(), letters.end(), letters.begin(), ::tolower);
 	std::ifstream ifs(filename);
 	if (!ifs.is_open()) {
 		std::cout << "Could not open input file: " << filename << '\n';
+		return 1;
 	}
 	int num_words = 0;
 	WordTrie wt;
@@ -49,7 +56,11 @@ int main(int argc, char** argv) {
 	count = args.get_option_or<int>("-l", words.size());
 	count = std::min<int>(count, words.size());
 	for (int i = 0; i < count; ++i) {
-		std::cout << words[i] << " : " << score(words[i]) << '\n';
+		if (letter_count < 1)
+			std::cout << words[i] << " : " << score(words[i]) << '\n';
+		else
+			if (words[i].size() == letter_count)
+				std::cout << words[i] << " : " << score(words[i]) << '\n';
 	}
 	return 0;
 }
