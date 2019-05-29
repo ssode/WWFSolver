@@ -2,7 +2,7 @@
 Solver for the Words with Friends game written in C++
 
 ## Usage
-wwfsolver [options] [letters]wwf
+wwfsolver [options] [letters]
 
 ## Options
 -p [prefix] : sets the prefix of the search string
