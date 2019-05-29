@@ -22,10 +22,11 @@ int main(int argc, char** argv) {
 		std::cout << "Usage: wwfsolver [options] [letters]\n";
 		return 1;
 	} else if (args.has_option("-?") || args.has_option("--help")) {
-		std::cout 
+		std::cout
 			<< "Usage: wwfsolver [options] [letters]\n"
-			<< "Options:\n" 
+			<< "Options:\n"
 			<< "\t-p [prefix] : sets the prefix of the search string\n"
+			<< "\t-t [template] : specifies a template for building words, using _ for empty spaces\n"
 			<< "\t-l [limit] : sets a limit on the number of results returned\n"
 			<< "\t-lc [num_letters] : specifies the number of letters in the words to be returned\n"
 			<< "\t-f [filename] : specifies a file to use as input (1 word per line)\n";
@@ -34,10 +35,12 @@ int main(int argc, char** argv) {
 	int count;
 	std::string filename = args.get_option_or<std::string>("-f", "wordlist.txt");
 	std::string prefix = args.get_option_or<std::string>("-p", "");
+	std::string templ = args.get_option_or<std::string>("-t", "");
 	std::string letters = argv[argc - 1];
 	int letter_count = args.get_option_or<int>("-lc", 0);
 	std::transform(prefix.begin(), prefix.end(), prefix.begin(), ::tolower);
 	std::transform(letters.begin(), letters.end(), letters.begin(), ::tolower);
+	std::transform(templ.begin(), templ.end(), templ.begin(), ::tolower);
 	std::ifstream ifs(filename);
 	if (!ifs.is_open()) {
 		std::cout << "Could not open input file: " << filename << '\n';
@@ -49,7 +52,12 @@ int main(int argc, char** argv) {
 		wt.insert(line);
 	}
 	std::cout << "Loaded " << num_words << " words from " << filename << '\n';
-	auto words = wt.build_words(letters, prefix);
+	std::vector<std::string> words;
+	if (templ != "") {
+		words = wt.build_from_template(templ, letters);
+	} else {
+		words = wt.build_words(letters, prefix);
+	} 
 	std::sort(words.begin(), words.end(), [](const auto& a, const auto& b) {
 		return score(a) > score(b);
 	});

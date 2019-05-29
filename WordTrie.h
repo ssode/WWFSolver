@@ -3,7 +3,8 @@
 #include <array>
 #include <memory>
 #include <vector>
-#include <set>
+#include <unordered_set>
+#include <deque>
 
 
 	class WordTrie {
@@ -27,7 +28,9 @@
 
 		Node* _search(const std::string& val) const;
 
-		void _build_words(std::set<std::string>& results, std::string letters, std::string prefix, Node* cursor) const;
+		void _build_words(std::unordered_set<std::string>& results, std::string letters, std::string prefix, Node* cursor) const;
+
+		void _build_template(std::unordered_set<std::string>& results, std::deque<char>& templ, std::string& letters, std::string& build, Node* cursor) const;
 
 	public:
 
@@ -37,8 +40,9 @@
 
 		void remove(const std::string& val);
 
-
 		std::vector<std::string> build_words(const std::string& source, const std::string& prefix = "") const;
+
+		std::vector<std::string> build_from_template(const std::string& templ, std::string& letters) const;
 	};
 
 
